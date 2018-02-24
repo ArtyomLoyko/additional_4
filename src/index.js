@@ -1,18 +1,73 @@
 module.exports = function multiply(first, second) {
-  var x = first * second;
-  if (Math.abs(x) < 1.0) {
-    var e = parseInt(x.toString().split('e-')[1]);
-    if (e) {
-        x *= Math.pow(10,e-1);
-        x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+  var a = first, b = second;
+  if(a.length < b.length) {
+    var c = a;
+    a = b;
+    b = c;
+  };
+
+  a = a.split('');
+  b = b.split('');
+
+  var sumRepo = [];
+  for(var i = b.length - 1; i >= 0; i--) {
+    var arr = [];
+    var balance;
+    for(var j = a.length - 1; j >= 0; j--) {
+      if(balance) {
+        var c = (a[j] * b[i]) + balance;
+        balance = 0;
+      } else {
+        var c = a[j] * b[i];
+      };
+
+      if(c > 9 && j) {
+        arr.unshift( +((c + '')[1]) );
+        balance = +((c + '')[0]);
+      } else if(c > 9) {
+        arr.unshift(+((c + '')[1]));
+        arr.unshift(+((c + '')[0]));
+      } else {
+        arr.unshift(c);
+      };
     }
-  } else {
-    var e = parseInt(x.toString().split('+')[1]);
-    if (e > 20) {
-        e -= 20;
-        x /= Math.pow(10,e);
-        x += (new Array(e+1)).join('0');
-    }
+    sumRepo.push(arr);
   }
-  return x + '';
+
+  var amountSymbols = sumRepo[0].length;
+  for(var i = 0; i < sumRepo.length - 1; i++) {
+    var length = sumRepo[i].length - sumRepo[i + 1].length;
+    if( length == 0 ) amountSymbols++;
+    if( length == -1 ) amountSymbols += 2;
+  }
+
+  for(var i = 0; i < sumRepo.length - 1; i++) {
+    var amountZeros = amountSymbols - sumRepo[i].length;
+    for(var j = 0; j < amountZeros; j++) sumRepo[i].unshift(0);
+  }
+
+  var result = [];
+  var balance;
+  for(var i = amountSymbols - 1; i >= 0; i--) {
+    var c = 0;
+    for(var j = 0; j < sumRepo.length; j++) {
+      if(sumRepo[j][i] == undefined) break;
+      if(balance) {
+        c += sumRepo[j][i] + balance;
+        balance = 0;
+      } else {
+        c += sumRepo[j][i];
+      };
+    };
+    if(c > 9 && i) {
+      result.unshift( +((c + '')[1]) );
+      balance = +((c + '')[0]);
+    } else if(c > 9) {
+      result.unshift(+((c + '')[1]));
+      result.unshift(+((c + '')[0]));
+    } else {
+      result.unshift(c);
+    };
+  };
+  return result.join('');
 }
